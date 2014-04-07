@@ -1,0 +1,65 @@
+Seminar04
+========================================================
+
+```{r}
+library(lattice)
+prDat <- read.table("GSE4051_data.tsv")
+getwd()
+str(prDat, max.level=0)
+prDes <- readRDS("GSE4051_design.rds")
+str(prDes)
+set.seed(987)
+theGene <- sample(1:nrow(prDat), size=1)
+theGene
+pDat <- data.frame(prDes, gExp= unlist(prDat[theGene,]))
+str(pDat)
+aggregate(gExp~ gType, pDat, FUN= mean)
+library(lattice)
+stripplot(gType~ gExp, pDat)
+t.test(gExp~ gType, pDat)
+ttRes <- t.test(gExp~ gType, pDat)
+str(ttRes)
+ttRes$statistic
+ttRes$p.value
+wilcox.test(gType, pDat)
+ks.test(gExp, gType, pDat)
+str(pDat)
+x <- subset(pDat, gType= wt)
+str(x)
+wilcox.test(wt, Nrlko)
+getwd()
+kDat <- readRDS("gse4051_MINI.rds")
+kMat <- as.matrix(kDat[c('crabHammer','eggBomb','poisonFang')])
+str(kMat)
+median(kMat[,1])
+median(kMat[,"eggBomb"])
+apply(kMat,2, median)
+apply(kMat, 2, quantile, probs=0.5)
+apply(kMat, 1, min)
+colnames(kMat)[apply(kMat, 1, which.min)]
+rowSums(kMat)
+jRowSums <- rowSums(prDat)
+jRowsums
+jRowsums <- apply(prDat, 1, sum)
+keepgenes <- c("1431708_a_at", "1424336_at", "1454696_at", "1416119_at", "1432141_x_at", "1429226_at")
+miniDat <- subset(prDat, rownames(prDat)%in% keepgenes)
+str(miniDat) 
+miniDat <- data.frame(gExp= as.vector(t(as.matrix(miniDat))), gene= factor(rep(rownames(miniDat), each=ncol(miniDat)), levels= keepgenes))
+str(miniDat)
+miniDat <- suppressWarnings(data.frame(prDes, miniDat))
+str(miniDat)
+library(lattice)
+stripplot(gType~ gExp| gene, miniDat, scales= list(x=list(relation= "free")), group= gType, auto.key= TRUE)
+someDat <- subset(miniDat, gene== keepgenes[1])
+t.test(gExp~ gType, someDat)
+install.packages(pkgs="plyr")
+library(plyr)
+d_ply(miniDat, ~ gene, function(x) t.test(gExp~ gType, x), .print= TRUE)
+ttRes <- dlply(miniDat, ~ gene, function(x) t.test(gExp~ gType, x))
+ttRes
+names(ttRes)
+ttRes["1454696_at"]
+
+
+```
+

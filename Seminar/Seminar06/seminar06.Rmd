@@ -1,0 +1,53 @@
+Seminar06
+========================================================
+```{r}
+library(limma)
+library(lattice)
+prData <- read.table("GSE4051_data.tsv", header= TRUE, row.names=1)
+str(prData, max.level=0)
+prDes <- readRDS("GSE4051_design.rds")
+str(prDes)
+prepareData <- function(myGenes) {
+  miniDat <- t(prDat[myGenes, ])
+  miniDat <- suppressWarnings(data.frame(gExp = as.vector(miniDat),
+                                         gene = rep(colnames(miniDat), each = nrow(miniDat))))
+  miniDat <- suppressWarnings(data.frame(prDes, miniDat))
+  miniDat
+}
+makeStripplot <- function(myData, ...) {
+  stripplot(gExp ~ devStage | gene, myData,
+            group = gType, jitter.data = TRUE,
+            auto.key = TRUE, type = c('p', 'a'), grid = TRUE, ...)
+}
+wtDes <- subset(prDes,gType=="wt")
+str(wtDes)
+wtDat <- subset(prData, select= prDes$gType=="wt")
+str(wtDat, max.level=0)
+wtDesMat <- model.matrix(~devStage, wtDes)
+str(wtDesMat)
+head(wtDesMat)               
+wtFit <- lmFit(wtDat, wtDesMat)
+wtEbFit <- eBayes(wtFit)
+topTable(wtEbFit)      
+dsHits <- topTable(wtEbFit,coef = grep("devStage", colnames(coef(wtEbFit))))
+cutoff <- 1e-05
+dsHits <- topTable(wtEbFit,coef = grep("devStage", colnames(coef(wtEbFit))),p.value = cutoff, n = Inf)
+numBHhits <- nrow(dsHits)
+dsHits <- topTable(wtEbFit,p.value = cutoff, n = Inf)
+numBHhits <- nrow(dsHits)
+numBHhits
+dsHits[63, c("F", "adj.P.Val", "devStageP6")]
+P2Hits <- topTable(wtEbFit, coef = "devStageP2", n = Inf, sort = "none")
+head(P2Hits)
+P10Hits <- topTable(wtEbFit, coef = "devStageP10", n = Inf, sort = "none")                
+head(P10Hits)               
+xyplot(P10Hits$t ~ P2Hits$t, aspect = 1,
+       xlab = "t-statistic for P2 effect",
+       ylab = "t-statistic for P10 effect",
+       xlim = c(-20, 16), ylim = c(-20, 16),
+       panel = function(x, y, ...) {
+         panel.smoothScatter(x, y, nbin = 100, ...)
+         panel.abline(a = 0, b = 1, col = "orange")
+         })
+```
+

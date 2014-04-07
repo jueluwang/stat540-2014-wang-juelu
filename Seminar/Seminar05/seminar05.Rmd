@@ -1,0 +1,77 @@
+Seminar05
+========================================================
+
+```{r}
+library(lattice)
+prDat <- read.table("GSE4051_data.tsv", header= TRUE, row.names=1)
+str(prDat)
+prDes <- readRDS("GSE4051_design.rds")
+str(prDes)
+prepareData <- function(myGenes) {
+    miniDat <- t(prDat[myGenes, ])
+    miniDat <- suppressWarnings(data.frame(gExp = as.vector(miniDat),
+                          gene = rep(colnames(miniDat), each = nrow(miniDat))))
+    miniDat <- suppressWarnings(data.frame(prDes, miniDat))
+    miniDat
+}
+
+(luckyGenes <- c("1419655_at","1438815_at"))
+jDat <- prepareData(luckyGenes)
+str(jDat)
+head(jDat)
+tail(jDat)
+stripplot(gExp~ devStage|gene, jDat, grou=gType, jitter.data= TRUE, auto.key= TRUE, type= c("p", "a"), grid=TRUE, pch=17, cex=3)
+luckygenes <- ("1456341_a_at")
+miniDat <- subset(prDat, rownames(prDat)%in%luckygenes)
+str(miniDat)
+miniDat <- data.frame(gExp=as.vector(t(as.matrix(miniDat))), gene=factor(rep(rownames(miniDat),each=ncol(miniDat)), levels=luckygenes))
+str(miniDat)
+jDat <- suppressWarnings(data.frame(prDes, miniDat))
+str(jDat)
+stripplot(gExp~ devStage|gene, jDat, group=gType, jitter.data= TRUE, auto.key= TRUE, type= c("p", "a"), grid=TRUE)
+str(jDat)
+head(jDat)
+ttestDat <- subset(jDat, devStage%in%c("P2", '4_weeks'))
+str(ttestDat)
+t.test(gExp~ devStage, ttestDat)
+stripplot(gExp~ devStage|gene, jDat,group=gType, jitter.data=TRUE, auto.key= TRUE, type=c("p", "a"), grid= TRUE)
+luckygenes <- ("1438786_a_at")
+miniDat <- subset(prDat, rownames(prDat)%in%luckygenes)
+miniDat <- data.frame(gExp=as.vector(t(as.matrix(miniDat))), gene=factor(rep(rownames(miniDat),each=ncol(miniDat)), levels=luckygenes))
+new2Dat <- suppressWarnings(data.frame(prDes, miniDat))
+str(new2Dat)
+stripplot(gExp~ devStage|gene, new2Dat,group=gType, jitter.data=TRUE, auto.key= TRUE, type=c("p", "a"), grid= TRUE)
+lmFit <- lm(gExp ~ devStage, mDat, subset = gType == "wt")
+summary(lmFit)
+coef(lmFit)
+contMat <- matrix(c(0, 1, 0, -1, 0), nrow = 1)
+obsDiff <- contMat %*% coef(lmFit)
+estSe <- contMat%*%vcov(lmFit)%*%t(contMat)
+estSe
+testStat <- obsDiff/estSe
+testStat
+2*pt(abs(testStat), df=df.residual(lmFit), lower.tail=FALSE)
+prepareData <- function(myGenes) {
+  miniDat <- t(prDat[myGenes, ])
+  miniDat <- suppressWarnings(data.frame(gExp = as.vector(miniDat),
+                                         gene = rep(colnames(miniDat), each = nrow(miniDat))))
+  miniDat <- suppressWarnings(data.frame(prDes, miniDat))
+  miniDat
+}
+makeStripplot <- function(myData, ...) {
+  stripplot(gExp ~ devStage | gene, myData,
+            group = gType, jitter.data = TRUE,
+            auto.key = TRUE, type = c('p', 'a'), grid = TRUE, ...)
+}
+oDat <- prepareData("1448690_at")
+str(oDat)
+makeStripplot(oDat)
+oFitBig <- lm(gExp~ gType*devStage, oDat)
+summary(oFitBig)$coef
+oFitSmall <- lm(gExp~ gType+ devStage, oDat)
+summary(oFitSmall)$coef
+anova(oFitBig, oFitSmall)
+
+
+```
+

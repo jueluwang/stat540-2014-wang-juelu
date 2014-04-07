@@ -1,0 +1,35 @@
+Semimar01
+========================================================
+
+```{r}
+prDat <- read.table("GSE4051_MINI.txt", header= TRUE, row.names=1)
+str(prDat)
+prDat <- read.table("GSE4051_MINI.txt")
+str(prDat)
+?read.table
+nrow(prDat)
+dim(prDat)
+dimname(prDat)
+dimnames(prDat)
+names(prDat)
+levels(prDat$devStage)
+str(prDat$devStage)
+summary(prDat$devStage)
+prDat[sample(nrow(prDat), size=6),]
+all(sort(prDat$sample))
+sort(prDat$sample)
+seq_len(nrow(prDat))
+sort(prDat$sample)==seq_len(nrow(prDat))
+table(prDat$sample,prDat$devStage)
+table(prDat$devStage, prDat$gType)
+with(prDat, table(devStage, gType))
+weeDat <- subset(prDat, poisonFang>7.5)
+nrow(weeDat)
+table(weeDat$gType)
+addmargins(with(weeDat, table(devStage, gType)))
+rownames(prDat)
+rownames(prDat[prDat$eggBomb < quantile(prDat$eggBomb, 0.1), ])
+
+
+```
+
